@@ -1,0 +1,49 @@
+
+DEBUG: True
+
+DB_SERVER: '192.168.1.73'
+DB_PORT: 3306
+DB_NAME: 'emqx_service'
+DB_USER: 'emqx_service'
+DB_PASSWD: 'MJGTMjaAEbDDbnRN'
+
+MQTT_HOST: "emqx.gs.dogwof.com"
+MQTT_IP: "192.168.1.74"
+MQTT_PORT: 1883
+MQTT_HTTP_PORT: "18083"
+MQTT_API_KEY: "ee26b0dd4af7e749"
+MQTT_SECRET_KEY: "gOyt0l007Q9B4gSFZaC39B0Qxm8gkX06wNHURF53IvD7B"
+
+# Redis 相关
+REDIS_CONF:
+  'HOST': '192.168.1.82'
+  'PORT': 6379
+  'PASSWORD': '123456'
+  'MAX_CONNECTIONS': 50
+
+# 微信小程序相关
+WX_APP_ID: 'wx81a123aecb7c5a5c'
+WX_SECRET_KEY: 'a87a28b6afba260675968c3c7c778d07'
+# 微信商户的相关配置
+# 微信商户号（畅凯科技）
+WX_MCH_ID: '1727996057'
+# 微信支付API证书序列号
+WX_SERIAL_NO: '7C97013ABCB4980134FED281302D45689EBF96EB'
+# 支付API证书路径（未使用）
+WX_CERT_PATH: 'app/common/wx_pay/cert/apiclient_cert.pem'
+# 支付API私钥路径（使用中）
+WX_KEY_PATH: 'app/common/wx_pay/cert/apiclient_key.pem'
+# 微信APIv3密钥
+WX_API_V3_KEY: 'bw41Wj13ZEghGHh2GWXz6tMz685FYLjY'
+# 微信支付公钥id
+PUB_KEY_ID: 'PUB_KEY_ID_0117279960572025092200291766002200'
+# 支付回调验签公钥
+WX_PUB_PATH: 'app/common/wx_pay/cert/pub_key.pem'
+# 平台证书序列号
+SERIAL_NO: '3AF0E48DD6E621452580531A647356A8A343290F'
+# 平台证书路径
+PUB_CERT_PATH: 'app/common/wx_pay/cert/3AF0E48DD6E621452580531A647356A8A343290F.pem'
+
+# 服务端域名，微信回调使用
+DOMAIN: 'https://mqttapi.20783378.com/'
+
