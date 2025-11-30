@@ -84,44 +84,69 @@ def exec_query(sql_query: str, database_name: str = None, limit: int = 100) -> D
             # 执行查询
             result = connection.execute(text(sql_query))
 
-            # 获取列名
-            columns = result.keys()
+            # 检查是否为 INSERT/UPDATE/DELETE 操作
+            sql_upper = sql_query.upper().strip()
+            is_dml_operation = any(sql_upper.startswith(op) for op in ['INSERT', 'UPDATE', 'DELETE'])
 
-            # 获取数据
-            rows = []
-            row_count = 0
-            for row in result:
-                row_data = {}
-                for i, column in enumerate(columns):
-                    # 处理特殊数据类型
-                    value = row[i]
-                    if value is not None:
-                        # 如果是 bytes 类型，转换为字符串
-                        if isinstance(value, bytes):
-                            value = value.decode('utf-8', errors='ignore')
-                        # 如果是 datetime 类型，转换为字符串
-                        elif hasattr(value, 'isoformat'):
-                            value = value.isoformat()
-                    row_data[column] = value
-                rows.append(row_data)
-                row_count += 1
+            if is_dml_operation:
+                # 对于 INSERT/UPDATE/DELETE，返回影响行数
+                affected_rows = result.rowcount
+                connection.commit()  # 提交事务
 
-            # 获取查询执行信息
-            execution_info = {
-                "sql_query": sql_query,
-                "database": config.get('database', 'default'),
-                "columns": list(columns),
-                "row_count": row_count,
-                "limit_applied": limit if sql_upper.startswith('SELECT') and 'LIMIT' not in sql_upper else None
-            }
+                execution_info = {
+                    "sql_query": sql_query,
+                    "database": config.get('database', 'default'),
+                    "operation_type": "DML",
+                    "affected_rows": affected_rows
+                }
 
-            result_data = {
-                "message": "查询执行成功",
-                "execution_info": execution_info,
-                "data": rows
-            }
+                result_data = {
+                    "message": f"操作执行成功，影响 {affected_rows} 行",
+                    "execution_info": execution_info,
+                    "data": []
+                }
+                return result_data
+            else:
+                # 对于 SELECT 查询，返回查询结果
+                # 获取列名
+                columns = result.keys()
 
-            return result_data
+                # 获取数据
+                rows = []
+                row_count = 0
+                for row in result:
+                    row_data = {}
+                    for i, column in enumerate(columns):
+                        # 处理特殊数据类型
+                        value = row[i]
+                        if value is not None:
+                            # 如果是 bytes 类型，转换为字符串
+                            if isinstance(value, bytes):
+                                value = value.decode('utf-8', errors='ignore')
+                            # 如果是 datetime 类型，转换为字符串
+                            elif hasattr(value, 'isoformat'):
+                                value = value.isoformat()
+                        row_data[column] = value
+                    rows.append(row_data)
+                    row_count += 1
+
+                # 获取查询执行信息
+                execution_info = {
+                    "sql_query": sql_query,
+                    "database": config.get('database', 'default'),
+                    "columns": list(columns),
+                    "row_count": row_count,
+                    "operation_type": "SELECT",
+                    "limit_applied": limit if sql_upper.startswith('SELECT') and 'LIMIT' not in sql_upper else None
+                }
+
+                result_data = {
+                    "message": "查询执行成功",
+                    "execution_info": execution_info,
+                    "data": rows
+                }
+
+                return result_data
 
     except SQLAlchemyError as e:
         logger.error(f"数据库查询错误: {e}")

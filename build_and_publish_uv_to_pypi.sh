@@ -3,6 +3,11 @@
 
 set -e
 
+# 加载 .env 文件中的环境变量
+if [ -f .env ]; then
+    export $(grep -v '^#' .env | xargs)
+fi
+
 # 配置 PyPI 凭据
 export PYPI_USERNAME="__token__"
 export PYPI_PASSWORD="${PYPI_API_TOKEN:-$TWINE_PASSWORD}"
