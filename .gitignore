@@ -1,0 +1,13 @@
+.venv/
+dist/
+demo/
+excel_files/
+__pycache__/
+.notes/
+*.log
+/src/sqlalchemy_fastmcp.egg-info/
+/.claude/settings.local.json
+/IFLOW.md
+/.env
+/.iflow/
+/.claude/
