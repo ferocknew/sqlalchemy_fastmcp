@@ -13,6 +13,9 @@ from .set_database_source import (
     reset_database_source,
     get_current_database_source
 )
+from .set_database_source_on_ssh import set_database_source_on_ssh
+from .stop_ssh_tunnel import stop_ssh_tunnel
+from .get_ssh_tunnel_status import get_ssh_tunnel_status
 
 __all__ = [
     "exec_query",
@@ -22,5 +25,8 @@ __all__ = [
     "test_database_connection",
     "set_database_source",
     "reset_database_source",
-    "get_current_database_source"
+    "get_current_database_source",
+    "set_database_source_on_ssh",
+    "stop_ssh_tunnel",
+    "get_ssh_tunnel_status"
 ]

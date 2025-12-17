@@ -17,7 +17,10 @@ from sqlalchemy_fastmcp.tools import (
     exec_query,
     set_database_source,
     reset_database_source,
-    get_current_database_source
+    get_current_database_source,
+    set_database_source_on_ssh,
+    stop_ssh_tunnel,
+    get_ssh_tunnel_status
 )
 
 # 获取项目根目录路径用于日志文件路径
@@ -338,6 +341,152 @@ def get_current_database_source_tool() -> Dict[str, Any]:
         return get_current_database_source()
     except Exception as e:
         logger.error(f"Error getting current database source: {e}")
+        raise
+
+@mcp.tool()
+def set_database_source_on_ssh_tool(
+    ssh_hostname: str,
+    ssh_username: str,
+    ssh_password: str = "",
+    ssh_passkey: str = "",
+    ssh_port: int = 22,
+    db_type: str = "mysql",
+    db_host: str = "127.0.0.1",
+    db_port: int = 3306,
+    db_username: str = "root",
+    db_password: str = "",
+    db_database_name: str = "",
+    db_charset: str = "utf8mb4"
+) -> Dict[str, Any]:
+    """
+    通过 SSH 隧道设置数据库数据源
+
+    使用 SSH 隧道安全连接远程数据库服务器。所有数据库流量将通过 SSH 隧道加密传输。
+    支持密码和密钥两种认证方式，如果同时提供则优先尝试密钥认证，失败后尝试密码认证。
+
+    Args:
+        ssh_hostname: SSH 服务器地址
+        ssh_username: SSH 登录用户名
+        ssh_password: SSH 登录密码（与 ssh_passkey 二选一，或同时提供）
+        ssh_passkey: SSH 私钥文件路径（与 ssh_password 二选一，或同时提供）
+        ssh_port: SSH 端口，默认 22
+        db_type: 数据库类型，目前仅支持 mysql
+        db_host: 远程服务器上数据库的地址，通常是 127.0.0.1
+        db_port: 数据库端口，默认 3306
+        db_username: 数据库用户名
+        db_password: 数据库密码
+        db_database_name: 数据库名称
+        db_charset: 数据库编码，默认 utf8mb4
+
+    Returns:
+        Dict[str, Any]: 包含设置结果的字典对象
+
+    Raises:
+        ValueError: 当参数不正确或认证失败时
+        SQLAlchemyError: 当数据库连接测试失败时
+        Exception: 当其他操作失败时
+
+    Example:
+        # 使用密码认证
+        set_database_source_on_ssh_tool(
+            ssh_hostname="192.168.1.100",
+            ssh_username="ubuntu",
+            ssh_password="ssh_password",
+            ssh_port=22,
+            db_host="127.0.0.1",
+            db_port=3306,
+            db_username="root",
+            db_password="db_password",
+            db_database_name="mydb"
+        )
+
+        # 使用密钥认证
+        set_database_source_on_ssh_tool(
+            ssh_hostname="192.168.1.100",
+            ssh_username="ubuntu",
+            ssh_passkey="/home/user/.ssh/id_rsa",
+            ssh_port=22,
+            db_host="127.0.0.1",
+            db_port=3306,
+            db_username="root",
+            db_password="db_password",
+            db_database_name="mydb"
+        )
+
+    Note:
+        - 使用长连接模式，隧道在 MCP 服务运行期间保持开启
+        - 设置新的 SSH 隧道会自动关闭之前的隧道
+        - 使用 pool_recycle=3600 防止连接超时
+        - 如果同时提供密钥和密码，优先尝试密钥认证，失败后尝试密码认证
+    """
+    try:
+        return set_database_source_on_ssh(
+            ssh_hostname=ssh_hostname,
+            ssh_username=ssh_username,
+            ssh_password=ssh_password,
+            ssh_passkey=ssh_passkey,
+            ssh_port=ssh_port,
+            db_type=db_type,
+            db_host=db_host,
+            db_port=db_port,
+            db_username=db_username,
+            db_password=db_password,
+            db_database_name=db_database_name,
+            db_charset=db_charset
+        )
+    except Exception as e:
+        logger.error(f"Error setting database source on SSH: {e}")
+        raise
+
+@mcp.tool()
+def stop_ssh_tunnel_tool() -> Dict[str, Any]:
+    """
+    关闭 SSH 隧道
+
+    停止当前活跃的 SSH 隧道连接，释放相关资源。
+
+    Returns:
+        Dict[str, Any]: 包含关闭结果的字典对象
+
+    Raises:
+        Exception: 当关闭操作失败时
+
+    Example:
+        stop_ssh_tunnel_tool()
+
+    Note:
+        - 关闭隧道后，之前通过隧道建立的数据库连接将不再可用
+        - 建议在关闭隧道前先关闭所有数据库连接
+    """
+    try:
+        return stop_ssh_tunnel()
+    except Exception as e:
+        logger.error(f"Error stopping SSH tunnel: {e}")
+        raise
+
+@mcp.tool()
+def get_ssh_tunnel_status_tool() -> Dict[str, Any]:
+    """
+    获取 SSH 隧道状态
+
+    返回当前 SSH 隧道的连接状态信息。
+
+    Returns:
+        Dict[str, Any]: 包含隧道状态的字典对象
+
+    Raises:
+        Exception: 当获取状态失败时
+
+    Example:
+        get_ssh_tunnel_status_tool()
+
+    Note:
+        返回信息包括隧道是否活跃、本地绑定端口、SSH 服务器地址等
+    """
+    try:
+        return get_ssh_tunnel_status()
+    except Exception as e:
+        logger.error(f"Error getting SSH tunnel status: {e}")
         raise
 
 async def run_sse():
