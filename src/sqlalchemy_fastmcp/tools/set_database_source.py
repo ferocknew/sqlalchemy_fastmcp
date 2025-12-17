@@ -8,7 +8,7 @@ import os
 from typing import Dict, Any
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
-from .utils import create_connection_string, get_database_config
+from ..utils import create_connection_string, get_database_config
 
 logger = logging.getLogger(__name__)
 

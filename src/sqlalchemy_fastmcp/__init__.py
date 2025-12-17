@@ -10,11 +10,13 @@ __author__ = "ferock"
 __email__ = "ferock@gmail.com"
 
 from .server import mcp, run_stdio
-from .show_databases import show_databases
-from .get_database_info import get_database_info
-from .test_database_connection import test_database_connection
-from .show_tables import show_tables
-from .exec_query import exec_query
+from .tools import (
+    show_databases,
+    get_database_info,
+    test_database_connection,
+    show_tables,
+    exec_query
+)
 from .utils import get_database_config, create_connection_string, get_version
 
 __all__ = [

@@ -6,7 +6,7 @@ import os
 import logging
 import json
 from typing import Dict, Any
-from .utils import get_database_config
+from ..utils import get_database_config
 
 logger = logging.getLogger(__name__)
 

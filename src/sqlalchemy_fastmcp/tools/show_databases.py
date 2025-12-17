@@ -7,7 +7,7 @@ import json
 from typing import Dict, Any
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
-from .utils import get_database_config, create_connection_string
+from ..utils import get_database_config, create_connection_string
 
 logger = logging.getLogger(__name__)
 
