@@ -137,15 +137,18 @@ def test_database_connection_tool() -> Dict[str, Any]:
         raise
 
 @mcp.tool()
-def show_tables_tool(database_name: str = None) -> Dict[str, Any]:
+def show_tables_tool(database_name: str = None, page: int = 1, page_size: int = 20, table_name: str = None) -> Dict[str, Any]:
     """
-    显示当前数据库内数据表的列表
+    显示数据库内数据表的列表（支持分页）
 
-    连接到指定的数据库，获取所有数据表的列表。
-    支持 MySQL 数据库，返回表的详细信息。
+    连接到指定的数据库，获取数据表列表，支持分页查询。
+    支持 MySQL 和 SQLite 数据库，返回表的详细信息。
 
     Args:
         database_name: 数据库名称，如果为 None 则使用配置中的默认数据库
+        page: 页码，默认第 1 页
+        page_size: 每页显示数量，默认 20 条
+        table_name: 表名筛选（可选），支持模糊匹配
 
     Returns:
         Dict[str, Any]: 包含表列表的字典对象
@@ -155,7 +158,8 @@ def show_tables_tool(database_name: str = None) -> Dict[str, Any]:
         Exception: 当其他操作失败时
 
     Example:
-        show_tables_tool("my_database")
+        show_tables_tool("my_database", page=1, page_size=20)
+        show_tables_tool("my_database", page=2, page_size=10, table_name="user")
 
     Note:
         需要在 .env 文件中配置数据库连接信息：
@@ -165,9 +169,17 @@ def show_tables_tool(database_name: str = None) -> Dict[str, Any]:
         - DB_PASS: 数据库密码
         - DB_TYPE: 数据库类型（mysql）
         - DB_CHARSET: 数据库编码（可选）
+
+        返回数据包含分页信息：
+        - total_tables: 总表数量
+        - page: 当前页码
+        - page_size: 每页数量
+        - total_pages: 总页数
+        - tables: 当前页的表信息列表
+        - table_name_filter: 筛选条件
     """
     try:
-        return show_tables(database_name)
+        return show_tables(database_name, page, page_size, table_name)
     except Exception as e:
         logger.error(f"Error showing tables: {e}")
         raise

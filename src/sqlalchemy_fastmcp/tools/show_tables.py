@@ -11,15 +11,18 @@ from ..utils import get_database_config, create_connection_string
 
 logger = logging.getLogger(__name__)
 
-def show_tables(database_name: str = None) -> Dict[str, Any]:
+def show_tables(database_name: str = None, page: int = 1, page_size: int = 20, table_name: str = None) -> Dict[str, Any]:
     """
-    显示当前数据库内数据表的列表
+    显示数据库内数据表的列表（支持分页）
 
-    连接到指定的数据库，获取所有数据表的列表。
-    支持 MySQL 数据库，返回表的详细信息。
+    连接到指定的数据库，获取数据表列表，支持分页查询。
+    支持 MySQL 和 SQLite 数据库，返回表的详细信息。
 
     Args:
         database_name: 数据库名称，如果为 None 则使用配置中的默认数据库
+        page: 页码，默认第 1 页
+        page_size: 每页显示数量，默认 20 条
+        table_name: 表名筛选（可选），支持模糊匹配
 
     Returns:
         Dict[str, Any]: 包含表列表的字典对象
@@ -29,7 +32,8 @@ def show_tables(database_name: str = None) -> Dict[str, Any]:
         Exception: 当其他操作失败时
 
     Example:
-        show_tables("my_database")
+        show_tables("my_database", page=1, page_size=20)
+        show_tables("my_database", page=2, page_size=10, table_name="user")
 
     Note:
         需要在 .env 文件中配置数据库连接信息：
@@ -49,6 +53,12 @@ def show_tables(database_name: str = None) -> Dict[str, Any]:
         if database_name:
             config['database'] = database_name
 
+        # 参数校验
+        if page < 1:
+            page = 1
+        if page_size < 1:
+            page_size = 20
+
         # 创建连接字符串
         connection_string = create_connection_string(config)
         logger.info(f"连接字符串: {connection_string}")
@@ -63,11 +73,24 @@ def show_tables(database_name: str = None) -> Dict[str, Any]:
                 result = connection.execute(text("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'"))
             else:
                 result = connection.execute(text("SHOW TABLES"))
-            tables = [row[0] for row in result.fetchall()]
+            all_tables = [row[0] for row in result.fetchall()]
 
-            # 获取每个表的详细信息
+            # 筛选表名（如果指定了 table_name）
+            if table_name:
+                all_tables = [t for t in all_tables if table_name.lower() in t.lower()]
+
+            # 计算分页信息
+            total_tables = len(all_tables)
+            start_idx = (page - 1) * page_size
+            end_idx = start_idx + page_size
+            paginated_tables = all_tables[start_idx:end_idx]
+
+            # 计算总页数
+            total_pages = (total_tables + page_size - 1) // page_size
+
+            # 获取每页表的详细信息
             tables_info = []
-            for table_name in tables:
+            for table_name in paginated_tables:
                 try:
                     if config['db_type'] == 'sqlite':
                         # SQLite 使用 PRAGMA 获取表结构
@@ -134,10 +157,14 @@ def show_tables(database_name: str = None) -> Dict[str, Any]:
                     })
 
             result_data = {
-                "message": "成功获取表列表",
+                "message": f"第 {page} / {total_pages} 页，共 {total_tables} 个表",
                 "database": config.get('database', 'default'),
-                "total_tables": len(tables),
-                "tables": tables_info
+                "total_tables": total_tables,
+                "page": page,
+                "page_size": page_size,
+                "total_pages": total_pages,
+                "tables": tables_info,
+                "table_name_filter": table_name
             }
 
             return result_data
