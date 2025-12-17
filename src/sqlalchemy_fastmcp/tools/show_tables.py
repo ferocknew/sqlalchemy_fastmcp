@@ -88,71 +88,48 @@ def show_tables(database_name: str = None, page: int = 1, page_size: int = 20, t
             # 计算总页数
             total_pages = (total_tables + page_size - 1) // page_size
 
-            # 获取每页表的详细信息
+            # 获取每页表的基本信息（表名和注释）
             tables_info = []
             for table_name in paginated_tables:
                 try:
                     if config['db_type'] == 'sqlite':
-                        # SQLite 使用 PRAGMA 获取表结构
-                        result = connection.execute(text(f"PRAGMA table_info(`{table_name}`)"))
-                        columns = []
-                        for row in result.fetchall():
-                            columns.append({
-                                "field": row[1],  # name
-                                "type": row[2],   # type
-                                "null": "NO" if row[3] == 1 else "YES",  # notnull
-                                "key": "PRI" if row[5] == 1 else "",  # pk
-                                "default": row[4],  # dflt_value
-                                "extra": ""
-                            })
-
-                        # 获取表的行数
-                        result = connection.execute(text(f"SELECT COUNT(*) FROM `{table_name}`"))
-                        row_count = result.fetchone()[0]
-
-                        # 获取表的创建语句
+                        # SQLite 获取表注释（从创建语句中提取）
                         result = connection.execute(text(f"SELECT sql FROM sqlite_master WHERE type='table' AND name='{table_name}'"))
-                        create_statement = result.fetchone()[0]
+                        create_sql = result.fetchone()[0] if result.fetchone() else ""
+
+                        # 从创建语句中提取注释（SQLite 的注释通常在特定位置）
+                        comment = ""
+                        if "/*" in create_sql and "*/" in create_sql:
+                            import re
+                            comment_match = re.search(r'/\*\s*(.*?)\s*\*/', create_sql)
+                            if comment_match:
+                                comment = comment_match.group(1)
 
                         tables_info.append({
                             "table_name": table_name,
-                            "columns": columns,
-                            "row_count": row_count,
-                            "create_statement": create_statement
+                            "table_comment": comment
                         })
                     else:
-                        # MySQL 使用 DESCRIBE
-                        result = connection.execute(text(f"DESCRIBE `{table_name}`"))
-                        columns = []
-                        for row in result.fetchall():
-                            columns.append({
-                                "field": row[0],
-                                "type": row[1],
-                                "null": row[2],
-                                "key": row[3],
-                                "default": row[4],
-                                "extra": row[5]
-                            })
-
-                        # 获取表的行数
-                        result = connection.execute(text(f"SELECT COUNT(*) FROM `{table_name}`"))
-                        row_count = result.fetchone()[0]
-
-                        # 获取表的创建信息
-                        result = connection.execute(text(f"SHOW CREATE TABLE `{table_name}`"))
-                        create_statement = result.fetchone()[1]
+                        # MySQL 获取表注释
+                        result = connection.execute(text(f"""
+                            SELECT TABLE_COMMENT
+                            FROM information_schema.TABLES
+                            WHERE TABLE_SCHEMA = DATABASE()
+                            AND TABLE_NAME = '{table_name}'
+                        """))
+                        comment = result.fetchone()
+                        table_comment = comment[0] if comment and comment[0] else ""
 
                         tables_info.append({
                             "table_name": table_name,
-                            "columns": columns,
-                            "row_count": row_count,
-                            "create_statement": create_statement
+                            "table_comment": table_comment
                         })
 
                 except Exception as e:
-                    logger.warning(f"获取表 {table_name} 信息失败: {e}")
+                    logger.warning(f"获取表 {table_name} 注释失败: {e}")
                     tables_info.append({
                         "table_name": table_name,
+                        "table_comment": "",
                         "error": str(e)
                     })
 

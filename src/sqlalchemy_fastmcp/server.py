@@ -175,8 +175,11 @@ def show_tables_tool(database_name: str = None, page: int = 1, page_size: int = 
         - page: 当前页码
         - page_size: 每页数量
         - total_pages: 总页数
-        - tables: 当前页的表信息列表
+        - tables: 当前页的表信息列表（只包含表名和注释）
         - table_name_filter: 筛选条件
+
+        注意：为了减少响应大小，只返回表名和注释信息。
+              如需完整的 DDL 或列信息，请使用 exec_query_tool 执行相应的 SQL 查询。
     """
     try:
         return show_tables(database_name, page, page_size, table_name)
