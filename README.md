@@ -1,7 +1,7 @@
 ### 项目说明
 - 模型上下文协议（MCP）服务器，允许您操作 MySQL 和 SQLite 数据库
 - 项目名称：sqlalchemy_fastmcp
-- 当前版本：v1.2.2
+- 当前版本：v1.2.6
 - 阅读当前目录下的 .env 文件，或者通过环境变量配置：
   - DB_TYPE: 数据库类型（支持 mysql、sqlite）
   - **MySQL 配置：**
@@ -86,7 +86,7 @@ export DB_NAME=/path/to/database.db
     "sqlalchemy-mcp": {
       "command": "uvx",
       "args": [
-        "--from", "sqlalchemy_fastmcp==1.2.2", "sqlalchemy-mcp-server", "stdio"],
+        "--from", "sqlalchemy_fastmcp==1.2.6", "sqlalchemy-mcp-server", "stdio"],
       "env": {
         "DB_TYPE": "mysql",
         "DB_HOST": "1.1.1.1",
@@ -108,7 +108,7 @@ export DB_NAME=/path/to/database.db
     "sqlalchemy-mcp-sqlite": {
       "command": "uvx",
       "args": [
-        "--from", "sqlalchemy_fastmcp==1.2.2", "sqlalchemy-mcp-server", "stdio"],
+        "--from", "sqlalchemy_fastmcp==1.2.6", "sqlalchemy-mcp-server", "stdio"],
       "env": {
         "DB_TYPE": "sqlite",
         "DB_NAME": "/path/to/database.db"
@@ -150,7 +150,7 @@ bash ./build_and_publish_uv.sh
 
 #### 方法一：指定版本号（推荐）
 ```bash
-uvx --from sqlalchemy_fastmcp==1.2.2 sqlalchemy-mcp-server stdio
+uvx --from sqlalchemy_fastmcp==1.2.6 sqlalchemy-mcp-server stdio
 ```
 
 #### 方法二：使用最新版本
@@ -165,11 +165,11 @@ uvx --from sqlalchemy_fastmcp sqlalchemy-mcp-server stdio
 以下命令可以直接在终端中运行以启动 MCP 服务器：
 
 ```bash
-uvx  --from sqlalchemy_fastmcp==1.2.2 sqlalchemy-mcp-server stdio
+uvx  --from sqlalchemy_fastmcp==1.2.6 sqlalchemy-mcp-server stdio
 ```
 
 此命令会：
-- 从 Nexus3 仓库安装 sqlalchemy_fastmcp 包（版本 1.2.2）
+- 从 Nexus3 仓库安装 sqlalchemy_fastmcp 包（版本 1.2.6）
 - 自动处理所有依赖关系
 - 启动 sqlalchemy-mcp-server 在 stdio 模式下运行
 - 无需预先安装包，uvx 会自动下载和运行
@@ -188,7 +188,7 @@ uvx  --from sqlalchemy_fastmcp==1.2.2 sqlalchemy-mcp-server stdio
 - 支持绝对路径和相对路径
 - 注意：SQLite 是单文件数据库，`show_databases` 功能会返回当前数据库文件信息
 
-### SSH 隧道连接 (v1.2.2+)
+### SSH 隧道连接 (v1.2.6+)
 - set_database_source_on_ssh_tool - 通过 SSH 隧道安全连接远程数据库
 - stop_ssh_tunnel_tool - 关闭 SSH 隧道
 - get_ssh_tunnel_status_tool - 获取隧道状态
