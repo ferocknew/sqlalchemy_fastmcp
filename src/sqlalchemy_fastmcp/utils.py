@@ -76,6 +76,10 @@ def is_sql_operation_allowed(sql_query: str) -> Tuple[bool, str]:
     # 清理和标准化SQL语句
     sql_clean = re.sub(r'\s+', ' ', sql_query.strip()).upper()
 
+    # 如果查询以 'SHOW' 开头，通常是安全的，直接允许
+    if sql_clean.startswith('SHOW'):
+        return True, ""
+
     # 检查INSERT操作
     if not permissions['allow_insert']:
         insert_patterns = [
